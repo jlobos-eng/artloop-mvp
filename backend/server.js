@@ -5,10 +5,10 @@ const admin = require('firebase-admin');
 // Lógica de Entorno (Producción vs Local)
 let serviceAccount;
 if (process.env.FIREBASE_CONFIG) {
-    // Si estamos en Render, lee el secreto encriptado
     serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+    // 🔥 EL FIX MÁGICO PARA RENDER 🔥 (Fuerza los saltos de línea correctos)
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 } else {
-    // Si estamos en tu Mac, lee el archivo físico
     serviceAccount = require("./serviceAccount.json");
 }
 
@@ -20,6 +20,8 @@ const db = admin.firestore();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// ... el resto de tu código queda igual ...
 
 // --- LÓGICA DE NEGOCIO CON PERSISTENCIA ---
 

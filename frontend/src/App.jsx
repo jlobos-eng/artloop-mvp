@@ -7,12 +7,23 @@ export default function App() {
   const [drops, setDrops] = useState([]);
   const [vaultValue, setVaultValue] = useState(145200);
 
-  // 1. Cargar el catálogo desde nuestro Backend al iniciar
+  // 1. Cargar el catálogo desde nuestro Backend
   useEffect(() => {
     fetch('https://artloop-mvp.onrender.com/api/drops')
       .then(res => res.json())
-      .then(data => setDrops(data))
-      .catch(err => console.error("Error conectando al backend:", err));
+      .then(data => {
+        // Validación: Si es un array real, lo guardamos. Si no, mostramos vacío.
+        if (Array.isArray(data)) {
+          setDrops(data);
+        } else {
+          console.error("El backend no devolvió un formato válido:", data);
+          setDrops([]);
+        }
+      })
+      .catch(err => {
+        console.error("Error conectando al backend:", err);
+        setDrops([]);
+      });
   }, []);
 
   const navigate = (view, artworkId = null) => {
