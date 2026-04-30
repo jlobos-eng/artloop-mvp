@@ -8,10 +8,10 @@ export default function App() {
   const [drops, setDrops] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ESTADO DE MONEDA GLOBAL
+  // ESTADOS NUEVOS
   const [currency, setCurrency] = useState('USD');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado de carga del botón
 
-  // Estado para el formulario de Admin
   const [newDrop, setNewDrop] = useState({ title: '', artist: '', image: '', originalBid: '', printPrice: '', totalPrints: 500 });
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -32,17 +32,14 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  // Conversor de Moneda
   const formatPrice = (usdPrice) => {
     if (!usdPrice) return "0";
     const rates = { USD: 1, CLP: 950, EUR: 0.92 };
     const symbols = { USD: '$', CLP: '$', EUR: '€' };
     const converted = usdPrice * rates[currency];
-
     return `${symbols[currency]}${converted.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
-  // Manejo de subida de imagen local (Conversión a Base64)
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -55,18 +52,28 @@ export default function App() {
     }
   };
 
+  // FUNCIÓN DE SUBIDA MEJORADA (Con Feedback Visual)
   const handleAddDrop = async (e) => {
     e.preventDefault();
-    const response = await fetch('https://artloop-mvp.onrender.com/api/admin/add-drop', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newDrop)
-    });
-    if (response.ok) {
-      alert("Obra subida con éxito");
-      window.location.reload();
-    } else {
-      alert("Error al subir. Quizás la imagen es muy pesada.");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('https://artloop-mvp.onrender.com/api/admin/add-drop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDrop)
+      });
+
+      if (response.ok) {
+        alert("✅ Obra subida con éxito");
+        window.location.reload();
+      } else {
+        alert("❌ Error al subir. Probablemente la imagen es muy pesada (Límite 1MB).");
+      }
+    } catch (error) {
+      alert("❌ Error de conexión con el servidor.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -80,18 +87,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 font-sans flex flex-col">
-
-      {/* NAVBAR */}
       <nav className="sticky top-0 w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center">
         <div className="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
-          {/* LOGO CORREGIDO */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('home')}>
             <TrendingUp className="text-fuchsia-500" />
             <span className="font-bold text-xl tracking-tighter">ART<span className="text-fuchsia-500">LOOP</span></span>
           </div>
 
           <div className="flex items-center space-x-6">
-            {/* SELECTOR DE MONEDA */}
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
@@ -109,12 +112,11 @@ export default function App() {
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
 
-        {/* VISTA: HOME */}
+        {/* VISTA HOME */}
         {currentView === 'home' && (
           <div className="animate-in fade-in duration-700">
             <header className="mb-12">
               <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight">Curaduría Exclusiva</h1>
-              {/* TEXTO RESTAURADO */}
               <p className="text-slate-400 max-w-xl text-lg">
                 Adquiere ediciones limitadas o invierte en piezas originales validadas en tiempo real por el mercado.
               </p>
@@ -123,8 +125,6 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {drops.map(drop => (
                 <div key={drop.id} className="group relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-fuchsia-500/50 transition-all shadow-2xl flex flex-col">
-
-                  {/* IMAGEN DE LA OBRA */}
                   <div onClick={() => navigate('artwork', drop.id)} className="aspect-[4/5] overflow-hidden cursor-pointer relative">
                     <img src={drop.image} alt={drop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-3 right-3 bg-black/80 px-2 py-1 rounded text-xs font-bold border border-slate-700 text-slate-300 flex items-center">
@@ -132,7 +132,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* DETALLES DE LA OBRA Y UI DE PRECIOS */}
                   <div className="p-6 flex flex-col flex-grow">
                     <div className="mb-4">
                       <h3 className="text-2xl font-bold leading-tight mb-1">{drop.title}</h3>
@@ -141,7 +140,6 @@ export default function App() {
                       </button>
                     </div>
 
-                    {/* CAJA DE PRECIOS (Diseño mejorado y marcado) */}
                     <div className="mt-auto bg-slate-950/80 rounded-xl p-4 border border-slate-800 flex justify-between items-center">
                       <div>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex items-center">Original <TrendingUp size={10} className="ml-1 text-cyan-400" /></p>
@@ -153,7 +151,6 @@ export default function App() {
                         <p className="text-xl font-bold text-white">{formatPrice(drop.printPrice)}</p>
                       </div>
                     </div>
-
                   </div>
                 </div>
               ))}
@@ -161,7 +158,7 @@ export default function App() {
           </div>
         )}
 
-        {/* VISTA: ADMIN PANEL */}
+        {/* VISTA ADMIN */}
         {currentView === 'admin' && (
           <div className="max-w-2xl mx-auto bg-slate-900 p-8 rounded-3xl border border-slate-800">
             <h2 className="text-3xl font-bold mb-6 flex items-center"><PlusCircle className="mr-2 text-fuchsia-500" /> Subir Nueva Obra</h2>
@@ -169,7 +166,6 @@ export default function App() {
               <input type="text" placeholder="Título de la Obra" className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-fuchsia-500 outline-none" onChange={e => setNewDrop({ ...newDrop, title: e.target.value })} required />
               <input type="text" placeholder="Nombre del Artista" className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-fuchsia-500 outline-none" onChange={e => setNewDrop({ ...newDrop, artist: e.target.value })} required />
 
-              {/* UPLOAD DE IMAGEN LOCAL */}
               <div className="w-full bg-slate-950 border-2 border-dashed border-slate-800 p-6 rounded-xl text-center hover:border-fuchsia-500 transition-colors relative cursor-pointer">
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required />
                 <div className="flex flex-col items-center pointer-events-none">
@@ -179,7 +175,7 @@ export default function App() {
                     <ImageIcon size={32} className="text-slate-600 mb-2" />
                   )}
                   <p className="text-slate-400 font-medium">{imagePreview ? "Imagen lista. Haz clic para cambiar." : "Haz clic para subir imagen desde tu PC"}</p>
-                  <p className="text-xs text-slate-600 mt-1">Formatos JPG, PNG. (Max 2MB para pruebas MVP)</p>
+                  <p className="text-xs text-slate-600 mt-1">Formatos JPG, PNG. (Recomendado: Menos de 1MB)</p>
                 </div>
               </div>
 
@@ -193,15 +189,29 @@ export default function App() {
                   <input type="number" placeholder="Precio Print (USD)" className="w-full bg-slate-950 border border-slate-800 p-3 pl-8 rounded-xl focus:border-fuchsia-500 outline-none" onChange={e => setNewDrop({ ...newDrop, printPrice: e.target.value })} required />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 py-4 rounded-xl font-bold transition-all mt-4">PUBLICAR EN ARTLOOP</button>
+
+              {/* BOTON INTELIGENTE DE CARGA */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full py-4 rounded-xl font-bold transition-all mt-4 flex justify-center items-center ${isSubmitting
+                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                    : 'bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-[0_0_15px_rgba(217,70,239,0.3)]'
+                  }`}
+              >
+                {isSubmitting ? (
+                  <><span className="animate-spin mr-2">⏳</span> PROCESANDO SUBIDA...</>
+                ) : (
+                  'PUBLICAR EN ARTLOOP'
+                )}
+              </button>
             </form>
-            <button onClick={() => navigate('home')} className="w-full mt-4 text-slate-500 hover:text-white">Cancelar</button>
+            {/* BOTON DE CANCELAR CORREGIDO */}
+            <button type="button" onClick={() => navigate('home')} className="w-full mt-4 text-slate-500 hover:text-white">Cancelar</button>
           </div>
         )}
 
-        {/* ... (Las vistas de Perfil de Artista y Detalle se mantienen iguales pero con formatPrice() aplicado) */}
-
-        {/* VISTA: DETALLE (ARTWORK) */}
+        {/* VISTA ARTWORK */}
         {currentView === 'artwork' && drops.find(d => d.id === activeArtworkId) && (() => {
           const art = drops.find(d => d.id === activeArtworkId);
           return (
@@ -246,7 +256,7 @@ export default function App() {
           )
         })()}
 
-        {/* VISTA: PERFIL DE ARTISTA */}
+        {/* VISTA ARTISTA */}
         {currentView === 'artist' && (
           <div className="animate-in slide-in-from-bottom-4 duration-500">
             <button onClick={() => navigate('home')} className="flex items-center text-slate-400 hover:text-white mb-8 transition-colors"><ArrowLeft size={20} className="mr-2" /> Galería General</button>
@@ -273,7 +283,7 @@ export default function App() {
         )}
       </main>
 
-      {/* FOOTER CORREGIDO */}
+      {/* FOOTER */}
       <footer className="border-t border-slate-900 bg-slate-950 py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-slate-500 text-sm space-y-2">
           <p className="font-bold tracking-widest text-slate-400">2026 ARTLOOP</p>
