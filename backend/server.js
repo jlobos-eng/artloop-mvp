@@ -2,8 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 
-// 1. Conexión con Firebase
-const serviceAccount = require("./serviceAccount.json");
+// Lógica de Entorno (Producción vs Local)
+let serviceAccount;
+if (process.env.FIREBASE_CONFIG) {
+    // Si estamos en Render, lee el secreto encriptado
+    serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+} else {
+    // Si estamos en tu Mac, lee el archivo físico
+    serviceAccount = require("./serviceAccount.json");
+}
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
