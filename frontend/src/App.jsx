@@ -59,8 +59,9 @@ export default function App() {
         {currentView === 'home' && (
           <div className="animate-in fade-in duration-500">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">Curaduría Exclusiva</h1>
-            <p className="text-slate-400 mb-8 max-w-2xl">Adquiere ediciones limitadas (B2C) o invierte en piezas originales validadas en tiempo real por el mercado (B2B).</p>
-
+            <p className="text-slate-400 mb-8 max-w-2xl">
+              Coleccionismo inteligente. Adquiere ediciones limitadas en papel Fine Art o invierte en la pieza original, cuyo valor es auditado e impulsado por la demanda en tiempo real.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {drops.map(drop => (
                 <div key={drop.id} onClick={() => navigate('artwork', drop.id)} className="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 cursor-pointer shadow-xl group hover:border-slate-600 transition-colors">
