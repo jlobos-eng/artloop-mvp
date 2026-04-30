@@ -9,7 +9,7 @@ export default function App() {
 
   // 1. Cargar el catálogo desde nuestro Backend al iniciar
   useEffect(() => {
-    fetch('http://localhost:5001/api/drops')
+    fetch('https://artloop-mvp.onrender.com/api/drops')
       .then(res => res.json())
       .then(data => setDrops(data))
       .catch(err => console.error("Error conectando al backend:", err));
@@ -24,7 +24,7 @@ export default function App() {
   // 2. Ejecutar la compra B2C e inflar el precio (Llamada al Backend)
   const handleBuyPrint = async (dropId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/drops/${dropId}/buy-print`, {
+      const response = await fetch(`https://artloop-mvp.onrender.com/api/drops/${dropId}/buy-print`, {
         method: 'POST'
       });
       const data = await response.json();
