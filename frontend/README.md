@@ -1,16 +1,42 @@
-# React + Vite
+# ArtLoop · Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA en React 19 + Vite + Tailwind v4. Consulta el [README raíz](../README.md) para
+una descripción del producto, arquitectura del backend y plan de despliegue.
 
-Currently, two official plugins are available:
+## Comandos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build
+npm run preview
+```
 
-## React Compiler
+## Variables de entorno
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Crea un archivo `.env` con:
 
-## Expanding the ESLint configuration
+```env
+VITE_API_BASE_URL=http://localhost:5001
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Si la variable no está presente, el cliente apunta a la API de producción.
+
+## Estructura
+
+```
+src/
+├── App.jsx               shell con router de alto nivel
+├── api/client.js         fetch wrapper con cache, errores tipados y base URL configurable
+├── hooks/                useDrops, useCurrency, useCountdown, useRouter
+├── utils/format.js       Intl.NumberFormat, slugify, formatRemaining
+├── components/           Navbar, Hero, DropCard, Countdown, Skeleton, Toast, ...
+└── pages/                HomePage, ArtworkPage, ArtistPage, AdminPage
+```
+
+## Sistema de diseño
+
+- Tokens definidos con `@theme` en `src/index.css` (Tailwind v4).
+- Tipografía dual: Space Grotesk (display) + Inter (body) con `display=swap`.
+- Mesh gradient + grid sutil de fondo, glassmorphism y motion respetuoso de
+  `prefers-reduced-motion`.

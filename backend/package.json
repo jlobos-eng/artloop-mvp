@@ -1,20 +1,29 @@
 {
-  "name": "backend",
+  "name": "artloop-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "ArtLoop API · curated art marketplace engine",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon --watch src --exec node src/server.js",
+    "seed": "node src/scripts/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "commonjs",
   "dependencies": {
+    "compression": "^1.7.4",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.4.0",
     "firebase-admin": "^13.8.0",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.14"
   }
 }

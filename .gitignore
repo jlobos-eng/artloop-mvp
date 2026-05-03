@@ -1,3 +1,19 @@
 node_modules
+
+# Environment files (never commit secrets)
 .env
+.env.local
+.env.*.local
+
+# Firebase service account
 backend/serviceAccount.json
+
+# Build artifacts
+frontend/dist
+backend/dist
+
+# Editor / OS
+.DS_Store
+.idea
+.vscode
+*.log
