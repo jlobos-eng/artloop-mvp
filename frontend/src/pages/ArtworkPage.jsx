@@ -10,6 +10,7 @@ import { useToast } from '../components/Toast';
 export function ArtworkPage({ drops, status, dropId, currency, onBack, onArtist, onUpdateDrop }) {
   const drop = drops.find((d) => d.id === dropId);
   const [purchasing, setPurchasing] = useState(false);
+  const [viewMode, setViewMode] = useState('detail'); // NUEVO: Estado para alternar vistas
   const toast = useToast();
 
   if (status === 'loading') {
@@ -61,6 +62,19 @@ export function ArtworkPage({ drops, status, dropId, currency, onBack, onArtist,
     }
   };
 
+  // --- NUEVO: LÓGICA DE ESCALA MATEMÁTICA PARA EL MOCKUP ---
+  const parseScale = (dimStr) => {
+    if (!dimStr) return 30; // Si no hay tamaño, mostramos al 30% por defecto
+    const match = dimStr.match(/(\d+)\s*[xX]/); // Extraemos el primer número (Ancho)
+    if (match && match[1]) {
+      const widthCm = parseInt(match[1]);
+      // Asumimos que la pared visible de la imagen de fondo tiene ~350cm de ancho
+      const scalePercent = (widthCm / 350) * 100;
+      return Math.min(Math.max(scalePercent, 10), 85); // Mínimo 10%, Máximo 85% para que no se rompa la pantalla
+    }
+    return 30;
+  };
+
   return (
     <div className="py-10 md:py-16">
       <button onClick={onBack} className="btn-ghost mb-8 text-sm">
@@ -69,15 +83,67 @@ export function ArtworkPage({ drops, status, dropId, currency, onBack, onArtist,
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-        <div className="rise relative rounded-3xl overflow-hidden border border-white/5 shadow-[0_50px_120px_-40px_rgba(0,0,0,0.8)]">
-          <img src={drop.image} alt={drop.title} className="w-full h-auto block" />
-          <div className="absolute top-4 left-4 flex gap-2">
-            <StatusBadge status={drop.status} />
-            <span className="glass rounded-full px-3 py-1.5">
-              <Countdown endsAt={drop.endsAt} fallback={drop.timeLeft} />
-            </span>
+
+        {/* --- CONTENEDOR VISUAL ACTUALIZADO (SWITCH + MOCKUP) --- */}
+        <div className="rise relative rounded-3xl overflow-hidden border border-white/5 shadow-[0_50px_120px_-40px_rgba(0,0,0,0.8)] bg-slate-900">
+
+          {/* SWITCH DE VISTAS */}
+          <div className="absolute top-4 right-4 z-20 flex bg-slate-950/80 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-xl">
+            <button
+              onClick={() => setViewMode('detail')}
+              className={`px-4 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-bold transition-all ${viewMode === 'detail' ? 'bg-fuchsia-600 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)]' : 'text-slate-400 hover:text-white'}`}
+            >
+              Obra
+            </button>
+            <button
+              onClick={() => setViewMode('mockup')}
+              className={`px-4 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-bold transition-all ${viewMode === 'mockup' ? 'bg-fuchsia-600 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)]' : 'text-slate-400 hover:text-white'}`}
+            >
+              En Espacio
+            </button>
           </div>
+
+          {viewMode === 'detail' ? (
+            <div className="relative">
+              <img src={drop.image} alt={drop.title} className="w-full h-auto block" />
+              <div className="absolute top-4 left-4 flex gap-2">
+                <StatusBadge status={drop.status} />
+                <span className="glass rounded-full px-3 py-1.5">
+                  <Countdown endsAt={drop.endsAt} fallback={drop.timeLeft} />
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="relative aspect-[4/5] w-full flex items-center justify-center overflow-hidden bg-zinc-900">
+              {/* Imagen de la sala de fondo (Unsplash) */}
+              <img
+                src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1000&auto=format&fit=crop"
+                alt="Room Mockup"
+                className="absolute inset-0 w-full h-full object-cover opacity-80"
+              />
+              {/* La obra superpuesta y escalada */}
+              <div
+                className="relative z-10 transition-all duration-700 ease-in-out"
+                style={{
+                  width: `${parseScale(drop.dimensions)}%`,
+                  transform: 'translateY(-20%)' // La subimos un poco para que quede sobre el sofá
+                }}
+              >
+                <img
+                  src={drop.image}
+                  alt={drop.title}
+                  className="w-full h-auto object-cover shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-black/20"
+                />
+              </div>
+              <div className="absolute bottom-6 left-0 w-full text-center z-20">
+                <p className="text-[10px] uppercase tracking-widest bg-black/70 inline-block px-4 py-2 rounded-full text-slate-300 backdrop-blur-md border border-white/10">
+                  Escala calculada: {drop.dimensions || 'Dimensión no definida'}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
+        {/* --- FIN CONTENEDOR VISUAL --- */}
 
         <div className="rise rise-delay-1">
           <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-400 font-semibold">
@@ -93,7 +159,7 @@ export function ArtworkPage({ drops, status, dropId, currency, onBack, onArtist,
             Por {drop.artist}
           </button>
 
-          {/* NUEVO: Ficha Técnica Rápida */}
+          {/* Ficha Técnica Rápida */}
           <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-300">
             {drop.dimensions && (
               <span className="bg-white/5 border border-white/10 rounded-full px-3 py-1">

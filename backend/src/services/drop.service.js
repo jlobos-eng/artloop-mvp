@@ -114,4 +114,13 @@ async function buyPrint(id) {
   });
 }
 
-module.exports = { listDrops, getDrop, createDrop, buyPrint };
+async function deleteDrop(id) {
+  const ref = db.collection(COLLECTION).doc(id);
+  const doc = await ref.get();
+  if (!doc.exists) throw ApiError.notFound('Obra no encontrada');
+
+  await ref.delete();
+  return { success: true };
+}
+
+module.exports = { listDrops, getDrop, createDrop, buyPrint, deleteDrop };

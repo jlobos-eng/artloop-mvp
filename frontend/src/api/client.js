@@ -82,6 +82,15 @@ export const api = {
     });
   },
 
+  // --- NUEVA FUNCIÓN PARA ELIMINAR ---
+  async deleteDrop(id, { adminToken }) {
+    cache.delete('drops'); // Borramos el caché para que la home se actualice
+    return request(`/api/admin/drops/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: adminToken ? { 'x-admin-token': adminToken } : {},
+    });
+  },
+
   invalidateCache() {
     cache.clear();
   },
